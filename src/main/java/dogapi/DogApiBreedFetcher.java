@@ -16,6 +16,7 @@ import java.util.*;
  */
 public class DogApiBreedFetcher implements BreedFetcher {
     private final OkHttpClient client = new OkHttpClient();
+    private static final String API_BASE = "https://dog.ceo/api/breed/";
 
     /**
      * Fetch the list of sub breeds for the given breed from the dog.ceo API.
@@ -30,6 +31,39 @@ public class DogApiBreedFetcher implements BreedFetcher {
         //      to refer to the examples of using OkHttpClient from the last lab,
         //      as well as the code for parsing JSON responses.
         // return statement included so that the starter code can compile and run.
-        return new ArrayList<>();
+
+        if (breed == null || breed.isEmpty()) {
+            throw new BreedNotFoundException("Breed name cannot be null or empty.");
+        }
+
+        String url = API_BASE + breed.toLowerCase() + "/list";
+
+        Request request = new Request.Builder().url(url).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                throw new BreedNotFoundException("Failed to fetch breed: " + breed);
+            }
+            String body = response.body().string();
+            JSONObject json = new JSONObject(body);
+
+            String status = json.optString("status", "error");
+            if (!"success".equals(status)) {
+                throw new BreedNotFoundException("Breed not found: " + breed);
+
+        }
+            JSONArray messageArray = json.optJSONArray("message");
+            List<String> subBreeds = new ArrayList<>();
+            if (messageArray != null) {
+                for (int i = 0; i < messageArray.length(); i++) {
+                    subBreeds.add(messageArray.getString(i));
+                }
+            }
+
+            return subBreeds;
+
+        } catch (IOException e) {
+            throw new BreedNotFoundException("API call failed for breed: " + breed, e);
+        }
     }
 }
