@@ -28,15 +28,17 @@ public class CachingBreedFetcher implements BreedFetcher {
         if (cache.containsKey(breed)) {
             return cache.get(breed);
         }
-        callsMade++;
+
         try {
             // using features
             List<String> subBreeds = underlyingFetcher.getSubBreeds(breed);
+            callsMade++;
             //if success, caching
             cache.put(breed, new ArrayList<>(subBreeds));
             return subBreeds;
         } catch (BreedNotFoundException e) {
             //if failed, throw error.
+            callsMade++;
             throw e;
         }
     }

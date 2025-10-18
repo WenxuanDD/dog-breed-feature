@@ -33,9 +33,9 @@ public class Main {
             return subBreeds.size();
 
         } catch (BreedFetcher.BreedNotFoundException e) {
-            // breed does not exist, print hint and return -1.
+            // breed does not exist, print hint and return 0.
             System.out.println("Breed not found: " + breed);
-            return -1;
+            return 0;
         }
 
     }
